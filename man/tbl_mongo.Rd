@@ -2,6 +2,7 @@
 % Please edit documentation in R/tbl_mongo.R
 \name{tbl_mongo}
 \alias{tbl_mongo}
+\alias{print.tbl_mongo}
 \alias{collapse.tbl_mongo}
 \alias{collect.tbl_mongo}
 \alias{print.mongo_query}
@@ -15,6 +16,8 @@ tbl_mongo(
   ...,
   mongotranslate.path = getOption("mongotranslate.path")
 )
+
+\method{print}{tbl_mongo}(x, ...)
 
 \method{collapse}{tbl_mongo}(x, keep.names = FALSE, ...)
 
@@ -40,7 +43,7 @@ order to infer the corresponding schema with mongodrdl (1000 by default).}
 software. Can be set via \code{options(mongotranslate.path = ....)}, or left empty
 if these executables are on the search path.}
 
-\item{x}{A \strong{mongo_query} object as obtained with \code{\link[=collapse]{collapse()}}.}
+\item{x}{A \strong{tbl_mongo} or a \strong{mongo_query} object as obtained with \code{\link[=collapse]{collapse()}}.}
 
 \item{keep.names}{Logical (\code{FALSE} by default). Should the (strange) names
 constructed by {dbplyr} be kept in the JSON MongoDB query or not?}
@@ -62,5 +65,40 @@ in MongoDB JSON language is computed on \code{\link[=collect]{collect()}}ing the
 by using \code{\link[=collapse]{collapse()}} to retrieve the JSON command in a character string.
 }
 \examples{
-# TODO...
+\donttest{
+# We use the same little MongoDB server with mtcars set up for {mongolite}
+# Note that mongotranslate and mongodrdl must be installed and accessible
+# see vignette("mongoplyr").
+library(mongoplyr)
+library(dplyr)
+database <- "test"
+collection <- "mtcars"
+mongodb_url <- "mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"
+tbl <- tbl_mongo(collection, database, url = mongodb_url)
+
+# Create a simple mongodb query
+tbl2 <- tbl |>
+  filter(mpg < 20) |>
+  select(mpg, cyl, hp)
+tbl2
+# Use collect() to get the result
+collect(tbl2)
+# Use collapse() to get the JSON query
+(query <- collapse(tbl2))
+# Use this JSON query directly in mongolite
+# Note, the connection is available as tbl2$mongo here but you do not
+# need {mongoplyr} any more and can use mongolite::mongo()$find() instead
+tbl2$mongo$aggregate(query)
+
+# A more complex exemple with summarise by group
+query2 <- tbl |>
+  select(mpg, cyl, hp) |>
+  group_by(cyl) |>
+  summarise(
+    mean_mpg = mean(mpg, na.rm = TRUE), sd_mpg = sd(mpg, na.rm = TRUE),
+    mean_hp  = mean(hp, na.rm = TRUE),  sd_hp  = sd(hp, na.rm = TRUE)) |>
+    collapse()
+query2
+tbl$mongo$aggregate(query2)
+}
 }

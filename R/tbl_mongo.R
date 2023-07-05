@@ -19,7 +19,7 @@
 #' if these executables are on the search path.
 #' @param keep.names Logical (`FALSE` by default). Should the (strange) names
 #' constructed by {dbplyr} be kept in the JSON MongoDB query or not?
-#' @param x A **mongo_query** object as obtained with [collapse()].
+#' @param x A **tbl_mongo** or a **mongo_query** object as obtained with [collapse()].
 #' @param sql Should the corresponding SQL statement be printed as well as the
 #' JSON query (`FALSE` by default?
 #'
@@ -31,7 +31,43 @@
 #' @export
 #'
 #' @examples
-#' # TODO...
+#' \donttest{
+#' # We use the same little MongoDB server with mtcars set up for {mongolite}
+#' # Note that mongotranslate and mongodrdl must be installed and accessible
+#' # see vignette("mongoplyr").
+#' library(mongoplyr)
+#' library(dplyr)
+#' database <- "test"
+#' collection <- "mtcars"
+#' mongodb_url <- "mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"
+#' tbl <- tbl_mongo(collection, database, url = mongodb_url)
+#'
+#' # Create a simple mongodb query
+#' tbl2 <- tbl |>
+#'   filter(mpg < 20) |>
+#'   select(mpg, cyl, hp)
+#' tbl2
+#' # Use collect() to get the result
+#' collect(tbl2)
+#' # Use collapse() to get the JSON query
+#' (query <- collapse(tbl2))
+#' # Use this JSON query directly in mongolite
+#' # Note, the connection is available as tbl2$mongo here but you do not
+#' # need {mongoplyr} any more and can use mongolite::mongo()$find() instead
+#' tbl2$mongo$aggregate(query)
+#'
+#' # A more complex exemple with summarise by group
+#' # Note: currently, names must be fun_var in summarise()
+#' query2 <- tbl |>
+#'   select(mpg, cyl, hp) |>
+#'   group_by(cyl) |>
+#'   summarise(
+#'     mean_mpg = mean(mpg, na.rm = TRUE), sd_mpg = sd(mpg, na.rm = TRUE),
+#'     mean_hp  = mean(hp, na.rm = TRUE),  sd_hp  = sd(hp, na.rm = TRUE)) |>
+#'     collapse()
+#' query2
+#' tbl$mongo$aggregate(query2)
+#' }
 tbl_mongo <- function(collection = "test", db = "test",
 url = "mongodb://localhost", max_scan = 1000L, ...,
 mongotranslate.path = getOption("mongotranslate.path")) {
@@ -43,6 +79,8 @@ mongotranslate.path = getOption("mongotranslate.path")) {
   tbl$mongo <- mongo
   tbl$mongo.db <- db # TODO: deal with db in the URL too
   tbl$mongo.collection <- collection
+  tbl$mongo.url <- url
+  tbl$max_scan <- max_scan
 
   # Create a schema for this database using mongodrdl
   cmd <- paste0('"', .mongodrdl(), '" --uri ',
@@ -55,7 +93,16 @@ mongotranslate.path = getOption("mongotranslate.path")) {
   tbl
 }
 
-# TODO: make a print.tbl_mongo() that provides useful information
+#' @export
+#' @rdname tbl_mongo
+#' @method print tbl_mongo
+print.tbl_mongo <- function(x, ...) {
+  cat("<tbl_mongo> A lazy MongoDB table\n")
+  cat("- server URL:", x$mongo.url, "\n")
+  cat("- max scan. :", x$max_scan, "\n\n")
+  cat(x$mongo.drdl, sep = "\n")
+  invisible(x)
+}
 
 #' @export
 #' @rdname tbl_mongo
@@ -135,6 +182,8 @@ collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
     name_prefix <- paste0('"', x$mongo.db, '_DOT_[^_]+_DOT_')
     forelast <- gsub(paste0(name_prefix, '([^"()]+)"'), '"\\1"',
       forelast)
+    # stddev_samp really should give a name sd
+    forelast <- gsub('_stddev_samp', '_sd', forelast)
     # Also rework sdd_DOT_qXX_DOT_fun(sdd_DOT_qXX_name) into fun_name
     forelast <- gsub(paste0('"', x$mongo.db, '_DOT_([a-zA-Z]+)\\('), '"\\1_',
       forelast)

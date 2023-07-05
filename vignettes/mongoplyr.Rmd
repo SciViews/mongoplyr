@@ -1,6 +1,8 @@
 ---
 title: "mongoplyr"
 output: rmarkdown::html_vignette
+description: >
+  Introduction to {mongoplyr}.
 vignette: >
   %\VignetteIndexEntry{mongoplyr}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,4 +20,4 @@ knitr::opts_chunk$set(
 library(mongoplyr)
 ```
 
-TODO: explain how to install required software (Mongo BI Connector), how to set up a test local MongoDB server with Docker and run a couple of example to illustrate how it works.
+TODO: a more detailled explanation on how to install required software (Mongo BI Connector), how to set up a test local MongoDB server with Docker and run several examples to illustrate how it works.

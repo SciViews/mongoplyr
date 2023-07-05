@@ -6,6 +6,8 @@
 \alias{mongoplyr-package}
 \title{mongoplyr: Use {dplyr} and {dbplyr} with MongoDB}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON queries with "mongotranslate" from the MongoDB BI connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from "dplyr" code to MongoDB JSON queries.
 }
 \details{

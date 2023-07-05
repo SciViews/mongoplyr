@@ -3,6 +3,7 @@
 S3method(collapse,tbl_mongo)
 S3method(collect,tbl_mongo)
 S3method(print,mongo_query)
+S3method(print,tbl_mongo)
 export(tbl_mongo)
 export(time_from_id)
 importFrom(dbplyr,remote_query)
