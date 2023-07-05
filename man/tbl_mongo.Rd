@@ -65,7 +65,7 @@ in MongoDB JSON language is computed on \code{\link[=collect]{collect()}}ing the
 by using \code{\link[=collapse]{collapse()}} to retrieve the JSON command in a character string.
 }
 \examples{
-\donttest{
+\dontrun{
 # We use the same little MongoDB server with mtcars set up for {mongolite}
 # Note that mongotranslate and mongodrdl must be installed and accessible
 # see vignette("mongoplyr").
@@ -91,6 +91,7 @@ collect(tbl2)
 tbl2$mongo$aggregate(query)
 
 # A more complex exemple with summarise by group
+# Note: currently, names must be fun_var in summarise()
 query2 <- tbl |>
   select(mpg, cyl, hp) |>
   group_by(cyl) |>

@@ -8,7 +8,7 @@
 
 Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON queries with "mongotranslate" from the MongoDB BI Connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from {dplyr} code to MongoDB JSON queries.
 
-**Note: this is highly experimental. Do not expect to obtain running queries in MongoDB JSON for any {dplyr} pipeline!** However, the code abtaine could be a base to be edited later on.
+**Note: this is highly experimental. Do not expect to obtain running queries in MongoDB JSON for any {dplyr} pipeline!** However, the code obtained could be a base to be edited later on.
 
 ## Installation
 

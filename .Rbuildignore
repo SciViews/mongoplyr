@@ -1,5 +1,7 @@
 ^mongoplyr\.Rproj$
 ^\.Rproj\.user$
+^README\.md$
+^NEWS\.md$
 ^LICENSE\.md$
 ^TODO\.md$
 ^CODE_OF_CONDUCT\.md$

@@ -31,7 +31,7 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # We use the same little MongoDB server with mtcars set up for {mongolite}
 #' # Note that mongotranslate and mongodrdl must be installed and accessible
 #' # see vignette("mongoplyr").
