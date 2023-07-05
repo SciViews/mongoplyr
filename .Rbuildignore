@@ -4,3 +4,7 @@
 ^TODO\.md$
 ^CODE_OF_CONDUCT\.md$
 ^\.github$
+^codecov\.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

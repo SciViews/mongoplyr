@@ -1,0 +1,23 @@
+url: https://www.sciviews.org/mongoplyr
+
+destination: docs
+
+development:
+  mode: auto
+
+template:
+  bootstrap: 5
+  package: svPkgdown
+  params:
+    bootswatch: spacelab
+    mathjax: true
+
+toc:
+  depth: 3
+
+home:
+  strip_header: true
+
+authors:
+  Philippe Grosjean:
+    href: https://phgrosjean.sciviews.org/
