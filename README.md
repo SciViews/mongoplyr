@@ -1,9 +1,9 @@
-# mongoplyr - Use {dplyr} verbs with a MongoDB database or construct MongoDB JSON queries from {dplyr} verbs
+# mongoplyr - Use {dplyr} verbs with a MongoDB database or construct MongoDB JSON queries from {dplyr} verbs <a href="https://www.sciviews.org/mongoplyr"><img src="man/figures/logo.png" alt="mongoplyr website" align="right" height="139"/></a>
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/SciViews/mongoplyr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SciViews/mongoplyr?branch=main)
+[![R-CMD-check](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/SciViews/mongoplyr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SciViews/mongoplyr?branch=main) [![CRAN status](https://www.r-pkg.org/badges/version/mongoplyr)](https://CRAN.R-project.org/package=mongoplyr) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+
 <!-- badges: end -->
 
 Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON queries with "mongotranslate" from the MongoDB BI Connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from {dplyr} code to MongoDB JSON queries.
