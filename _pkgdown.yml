@@ -7,6 +7,8 @@ development:
 
 template:
   bootstrap: 5
+  bslib:
+    code_font: {google: "JetBrains Mono"}
   package: svPkgdown
   params:
     bootswatch: spacelab
