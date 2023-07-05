@@ -1,0 +1,34 @@
+Package: mongoplyr
+Type: Package
+Version: 0.0.0.9000
+Title: Use {dplyr} and {dbplyr} with MongoDB
+Description: Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr}
+  to create SQL queries, and then converts them into MongoDB JSON queries with
+  "mongotranslate" from the MongoDB BI connector (to be installed). One can also
+  recover the JSON query to use it directly into {mongolite}. This way,
+  {mongoplyr} serves as a translator from "dplyr" code to MongoDB JSON queries.
+Authors@R: c(person("Philippe", "Grosjean", role = c("aut", "cre"),
+  email = "phgrosjean@sciviews.org",
+  comment = c(ORCID = "0000-0002-2694-9471")))
+Maintainer: Philippe Grosjean <phgrosjean@sciviews.org>
+Depends: R (>= 4.0.0)
+Imports: 
+    dbplyr,
+    dplyr,
+    mongolite
+Suggests: 
+    covr,
+    knitr,
+    markdown,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    spelling
+License: MIT + file LICENSE
+URL: https://github.com/SciViews/mongoplyr, https://www.sciviews.org/mongoplyr/
+BugReports: https://github.com/SciViews/mongoplyr/issues
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Encoding: UTF-8
+Language: en-US
+Config/testthat/edition: 3
+VignetteBuilder: knitr

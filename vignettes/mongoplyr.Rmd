@@ -1,0 +1,21 @@
+---
+title: "mongoplyr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mongoplyr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(mongoplyr)
+```
+
+TODO: explain how to install required software (Mongo BI Connector), how to set up a test local MongoDB server with Docker and run a couple of example to illustrate how it works.
