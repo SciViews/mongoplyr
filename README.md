@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SciViews/mongoplyr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON queries with "mongotranslate" from the MongoDB BI Connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from {dplyr} code to MongoDB JSON queries.
