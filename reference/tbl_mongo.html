@@ -168,46 +168,33 @@ the MongoDB JSON query corresponding to the process in a <strong>mongo_query</st
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># We use the same little MongoDB server with mtcars set up for {mongolite}</span></span></span>
 <span class="r-in"><span><span class="co"># Note that mongotranslate and mongodrdl must be installed and accessible</span></span></span>
 <span class="r-in"><span><span class="co"># see vignette("mongoplyr").</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SciViews/mongoplyr" class="external-link">mongoplyr</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘dplyr’</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     filter, lag</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     intersect, setdiff, setequal, union</span>
 <span class="r-in"><span><span class="va">database</span> <span class="op">&lt;-</span> <span class="st">"test"</span></span></span>
 <span class="r-in"><span><span class="va">collection</span> <span class="op">&lt;-</span> <span class="st">"mtcars"</span></span></span>
 <span class="r-in"><span><span class="va">mongodb_url</span> <span class="op">&lt;-</span> <span class="st">"mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"</span></span></span>
 <span class="r-in"><span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu">tbl_mongo</span><span class="op">(</span><span class="va">collection</span>, <span class="va">database</span>, url <span class="op">=</span> <span class="va">mongodb_url</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in .mongodrdl():</span> You must install MongoDB BI Connector and indicate the path in options(mongotranslate.path = ...) before use, see ?tbl_mongo.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a simple mongodb query</span></span></span>
 <span class="r-in"><span><span class="va">tbl2</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">&lt;</span> <span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="va">cyl</span>, <span class="va">hp</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("filter"):</span> no applicable method for 'filter' applied to an object of class "function"</span>
 <span class="r-in"><span><span class="va">tbl2</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'tbl2' not found</span>
 <span class="r-in"><span><span class="co"># Use collect() to get the result</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="va">tbl2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'tbl2' not found</span>
 <span class="r-in"><span><span class="co"># Use collapse() to get the JSON query</span></span></span>
 <span class="r-in"><span><span class="op">(</span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse</a></span><span class="op">(</span><span class="va">tbl2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'tbl2' not found</span>
 <span class="r-in"><span><span class="co"># Use this JSON query directly in mongolite</span></span></span>
 <span class="r-in"><span><span class="co"># Note, the connection is available as tbl2$mongo here but you do not</span></span></span>
 <span class="r-in"><span><span class="co"># need {mongoplyr} any more and can use mongolite::mongo()$find() instead</span></span></span>
 <span class="r-in"><span><span class="va">tbl2</span><span class="op">$</span><span class="va">mongo</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'tbl2' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A more complex exemple with summarise by group</span></span></span>
+<span class="r-in"><span><span class="co"># Note: currently, names must be fun_var in summarise()</span></span></span>
 <span class="r-in"><span><span class="va">query2</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="va">cyl</span>, <span class="va">hp</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
@@ -215,12 +202,9 @@ the MongoDB JSON query corresponding to the process in a <strong>mongo_query</st
 <span class="r-in"><span>    mean_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">mpg</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, sd_mpg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">mpg</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    mean_hp  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,  sd_hp  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("select"):</span> no applicable method for 'select' applied to an object of class "function"</span>
 <span class="r-in"><span><span class="va">query2</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'query2' not found</span>
 <span class="r-in"><span><span class="va">tbl</span><span class="op">$</span><span class="va">mongo</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in tbl$mongo:</span> object of type 'closure' is not subsettable</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
