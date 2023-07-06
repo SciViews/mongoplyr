@@ -32,27 +32,27 @@ tbl_mongo(
 
 \item{db}{The database to use from the MongoDB server.}
 
-\item{url}{The URL to the MongoDB server. This uses \code{\link[=mongo]{mongo()}} from
+\item{url}{The URL to the MongoDB server. This uses \code{mongo()} from
 {mongolite} internally, see the documentation at
 https://jeroen.github.io/mongolite/connecting-to-mongodb.html.}
 
-\item{mongo}{A \code{\link[=mongo]{mongo()}} connection to a MongoDB collection. If provided, it
+\item{mongo}{A \strong{mongo} connection to a MongoDB collection. If provided, it
 supersedes collection=, db= and url= that may not be provided (or a warning
 is issued).}
 
 \item{schema}{A schema for this collection as calculated by the MongoDB BI app
-"mongodrdl", in a \strong{mongo_schema} object from \code{\link[=mongo_schema]{mongo_schema()}}.}
+"mongodrdl", in a \strong{mongo_schema} object from \code{mongo_schema()}.}
 
 \item{max_scan}{The maximum number of documents to scan in the collection in
 order to infer the corresponding schema with mongodrdl (100 by default).}
 
-\item{...}{More parameters to \code{\link[=mongo]{mongo()}} to connect to the MongoDB server.}
+\item{...}{More parameters to \code{mongo()} to connect to the MongoDB server.}
 
 \item{path}{The path to the mongotranslate and mongodrdl
 software. Can be set via \code{options(mongotranslate.path = ....)}, or left empty
 if these executables are on the search path.}
 
-\item{x}{A \strong{tbl_mongo} or a \strong{mongo_query} object as obtained with \code{\link[=collapse]{collapse()}}.}
+\item{x}{A \strong{tbl_mongo} or a \strong{mongo_query} object as obtained with \code{collapse()}.}
 
 \item{keep.names}{Logical (\code{FALSE} by default). Should the (strange) names
 constructed by {dbplyr} be kept in the JSON MongoDB query or not?}
@@ -62,16 +62,16 @@ JSON query (\code{FALSE} by default?}
 }
 \value{
 A \strong{tbl_mongo} object that contains the logic to process queries on
-a MongoDB collection through {dplyr} verbs. \code{\link[=collect]{collect()}} returns a data.frame
-with the result from querying the MongoDB collection. \code{\link[=collapse]{collapse()}} returns
+a MongoDB collection through {dplyr} verbs. \code{collect()} returns a data.frame
+with the result from querying the MongoDB collection. \code{collapse()} returns
 the MongoDB JSON query corresponding to the process in a \strong{mongo_query}
 object.
 }
 \description{
 The \strong{tbl_mongo} object is a lazy connection to a MongoDB
 collection that you can use with {dbplyr} and {dplyr} verbs. The query
-in MongoDB JSON language is computed on \code{\link[=collect]{collect()}}ing the results, or
-by using \code{\link[=collapse]{collapse()}} to retrieve the JSON command in a character string.
+in MongoDB JSON language is computed on \code{collect()}ing the results, or
+by using \code{collapse()} to retrieve the JSON command in a character string.
 }
 \examples{
 \dontrun{
@@ -119,7 +119,4 @@ query2
 mcon$aggregate(query2)
 mcon$disconnect()
 }
-}
-\seealso{
-\code{\link[=mongo_schema]{mongo_schema()}}, \code{\link[=mongo]{mongo()}}
 }

@@ -18,8 +18,8 @@ mongo_schema(
 mtcars_schema(db = "test", collection = "mtcars")
 }
 \arguments{
-\item{mongo}{A \strong{mongo} object as obtained from \code{\link[=mongo]{mongo()}} or
-attr(\code{\link[=tbl_mongo]{tbl_mongo()}}, "mongo").}
+\item{mongo}{A \strong{mongo} object as obtained from \code{mongo()} or
+\code{attr(tbl_mongo(), "mongo")}.}
 
 \item{max_scan}{The maximum of documents to scan to elaborate the structure
 (100 by default).}
@@ -33,7 +33,7 @@ specify it.}
 
 \item{x}{A \strong{mongo_schema} object.}
 
-\item{...}{Further arguments passed to \code{\link[=print]{print()}} (not used currently).}
+\item{...}{Further arguments passed to \code{print()} (not used currently).}
 
 \item{db}{The name of the database.}
 

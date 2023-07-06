@@ -3,38 +3,37 @@
 #'
 #' @description The **tbl_mongo** object is a lazy connection to a MongoDB
 #'   collection that you can use with {dbplyr} and {dplyr} verbs. The query
-#'   in MongoDB JSON language is computed on [collect()]ing the results, or
-#'   by using [collapse()] to retrieve the JSON command in a character string.
+#'   in MongoDB JSON language is computed on `collect()`ing the results, or
+#'   by using `collapse()` to retrieve the JSON command in a character string.
 #'
 #' @param collection The collection to use in the MongoDB database.
 #' @param db The database to use from the MongoDB server.
-#' @param url The URL to the MongoDB server. This uses [mongo()] from
+#' @param url The URL to the MongoDB server. This uses `mongo()` from
 #' {mongolite} internally, see the documentation at
 #' https://jeroen.github.io/mongolite/connecting-to-mongodb.html.
-#' @param mongo A [mongo()] connection to a MongoDB collection. If provided, it
+#' @param mongo A **mongo** connection to a MongoDB collection. If provided, it
 #' supersedes collection=, db= and url= that may not be provided (or a warning
 #' is issued).
 #' @param schema A schema for this collection as calculated by the MongoDB BI app
-#' "mongodrdl", in a **mongo_schema** object from [mongo_schema()].
+#' "mongodrdl", in a **mongo_schema** object from `mongo_schema()`.
 #' @param max_scan The maximum number of documents to scan in the collection in
 #' order to infer the corresponding schema with mongodrdl (100 by default).
-#' @param ... More parameters to [mongo()] to connect to the MongoDB server.
+#' @param ... More parameters to `mongo()` to connect to the MongoDB server.
 #' @param path The path to the mongotranslate and mongodrdl
 #' software. Can be set via `options(mongotranslate.path = ....)`, or left empty
 #' if these executables are on the search path.
 #' @param keep.names Logical (`FALSE` by default). Should the (strange) names
 #' constructed by {dbplyr} be kept in the JSON MongoDB query or not?
-#' @param x A **tbl_mongo** or a **mongo_query** object as obtained with [collapse()].
+#' @param x A **tbl_mongo** or a **mongo_query** object as obtained with `collapse()`.
 #' @param sql Should the corresponding SQL statement be printed as well as the
 #' JSON query (`FALSE` by default?
 #'
 #' @return A **tbl_mongo** object that contains the logic to process queries on
-#' a MongoDB collection through {dplyr} verbs. [collect()] returns a data.frame
-#' with the result from querying the MongoDB collection. [collapse()] returns
+#' a MongoDB collection through {dplyr} verbs. `collect()` returns a data.frame
+#' with the result from querying the MongoDB collection. `collapse()` returns
 #' the MongoDB JSON query corresponding to the process in a **mongo_query**
 #' object.
 #' @export
-#' @seealso [mongo_schema()], [mongo()]
 #'
 #' @examples
 #' \dontrun{

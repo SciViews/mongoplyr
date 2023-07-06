@@ -8,8 +8,8 @@
 #' and testing purpose in the absence of the "mongodrdl" binaries (correct
 #' providing the `mtcars` data are inserted unmodified in an empty collection).
 #'
-#' @param mongo A **mongo** object as obtained from [mongo()] or
-#' attr([tbl_mongo()], "mongo").
+#' @param mongo A **mongo** object as obtained from `mongo()` or
+#' `attr(tbl_mongo(), "mongo")`.
 #' @param max_scan The maximum of documents to scan to elaborate the structure
 #' (100 by default).
 #' @param recalc Is the schema recalculated, in case it is present in the
@@ -18,7 +18,7 @@
 #' search path, or indicated in the "mongotranslate.path" option, no need to
 #' specify it.
 #' @param x A **mongo_schema** object.
-#' @param ... Further arguments passed to [print()] (not used currently).
+#' @param ... Further arguments passed to `print()` (not used currently).
 #' @param db The name of the database.
 #' @param collection The name of the collection.
 #'
