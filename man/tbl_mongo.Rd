@@ -12,9 +12,11 @@ tbl_mongo(
   collection = "test",
   db = "test",
   url = "mongodb://localhost",
-  max_scan = 1000L,
+  mongo = NULL,
+  schema = attr(mongo, "schema"),
+  max_scan = 100L,
   ...,
-  mongotranslate.path = getOption("mongotranslate.path")
+  path = getOption("mongotranslate.path")
 )
 
 \method{print}{tbl_mongo}(x, ...)
@@ -34,12 +36,19 @@ tbl_mongo(
 {mongolite} internally, see the documentation at
 https://jeroen.github.io/mongolite/connecting-to-mongodb.html.}
 
+\item{mongo}{A \code{\link[=mongo]{mongo()}} connection to a MongoDB collection. If provided, it
+supersedes collection=, db= and url= that may not be provided (or a warning
+is issued).}
+
+\item{schema}{A schema for this collection as calculated by the MongoDB BI app
+"mongodrdl", in a \strong{mongo_schema} object from \code{\link[=mongo_schema]{mongo_schema()}}.}
+
 \item{max_scan}{The maximum number of documents to scan in the collection in
-order to infer the corresponding schema with mongodrdl (1000 by default).}
+order to infer the corresponding schema with mongodrdl (100 by default).}
 
 \item{...}{More parameters to \code{\link[=mongo]{mongo()}} to connect to the MongoDB server.}
 
-\item{mongotranslate.path}{The path to the mongotranslate and mongodrdl
+\item{path}{The path to the mongotranslate and mongodrdl
 software. Can be set via \code{options(mongotranslate.path = ....)}, or left empty
 if these executables are on the search path.}
 
@@ -74,9 +83,16 @@ library(dplyr)
 database <- "test"
 collection <- "mtcars"
 mongodb_url <- "mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"
-tbl <- tbl_mongo(collection, database, url = mongodb_url)
 
-# Create a simple mongodb query
+# Connect and make sure the collection contains the mtcars dataset
+mcon <- mongolite::mongo(collection, database, mongodb_url)
+mcon$drop()
+mcon$insert(mtcars)
+
+# Create a lazy mongo object with this connection
+tbl <- tbl_mongo(mongo = mcon)
+
+# Create a mongodb query
 tbl2 <- tbl |>
   filter(mpg < 20) |>
   select(mpg, cyl, hp)
@@ -88,7 +104,7 @@ collect(tbl2)
 # Use this JSON query directly in mongolite
 # Note, the connection is available as tbl2$mongo here but you do not
 # need {mongoplyr} any more and can use mongolite::mongo()$find() instead
-tbl2$mongo$aggregate(query)
+mcon$aggregate(query)  # or attr(tbl2, 'mongo')$aggregate(query)
 
 # A more complex exemple with summarise by group
 # Note: currently, names must be fun_var in summarise()
@@ -100,6 +116,10 @@ query2 <- tbl |>
     mean_hp  = mean(hp, na.rm = TRUE),  sd_hp  = sd(hp, na.rm = TRUE)) |>
     collapse()
 query2
-tbl$mongo$aggregate(query2)
+mcon$aggregate(query2)
+mcon$disconnect()
 }
+}
+\seealso{
+\code{\link[=mongo_schema]{mongo_schema()}}, \code{\link[=mongo]{mongo()}}
 }

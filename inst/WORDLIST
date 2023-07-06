@@ -1,5 +1,7 @@
+attr
 CMD
 Codecov
+DRDL
 JSON
 PowerBI
 dbplyr
@@ -21,5 +23,6 @@ ObjectID
 objid
 ORCID
 POSIXct
+precomputed
 tbl
 WLS

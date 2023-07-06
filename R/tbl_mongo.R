@@ -7,14 +7,19 @@
 #'   by using [collapse()] to retrieve the JSON command in a character string.
 #'
 #' @param collection The collection to use in the MongoDB database.
-#' @param db  The database to use from the MongoDB server.
+#' @param db The database to use from the MongoDB server.
 #' @param url The URL to the MongoDB server. This uses [mongo()] from
 #' {mongolite} internally, see the documentation at
 #' https://jeroen.github.io/mongolite/connecting-to-mongodb.html.
+#' @param mongo A [mongo()] connection to a MongoDB collection. If provided, it
+#' supersedes collection=, db= and url= that may not be provided (or a warning
+#' is issued).
+#' @param schema A schema for this collection as calculated by the MongoDB BI app
+#' "mongodrdl", in a **mongo_schema** object from [mongo_schema()].
 #' @param max_scan The maximum number of documents to scan in the collection in
-#' order to infer the corresponding schema with mongodrdl (1000 by default).
+#' order to infer the corresponding schema with mongodrdl (100 by default).
 #' @param ... More parameters to [mongo()] to connect to the MongoDB server.
-#' @param mongotranslate.path The path to the mongotranslate and mongodrdl
+#' @param path The path to the mongotranslate and mongodrdl
 #' software. Can be set via `options(mongotranslate.path = ....)`, or left empty
 #' if these executables are on the search path.
 #' @param keep.names Logical (`FALSE` by default). Should the (strange) names
@@ -29,6 +34,7 @@
 #' the MongoDB JSON query corresponding to the process in a **mongo_query**
 #' object.
 #' @export
+#' @seealso [mongo_schema()], [mongo()]
 #'
 #' @examples
 #' \dontrun{
@@ -40,9 +46,16 @@
 #' database <- "test"
 #' collection <- "mtcars"
 #' mongodb_url <- "mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"
-#' tbl <- tbl_mongo(collection, database, url = mongodb_url)
 #'
-#' # Create a simple mongodb query
+#' # Connect and make sure the collection contains the mtcars dataset
+#' mcon <- mongolite::mongo(collection, database, mongodb_url)
+#' mcon$drop()
+#' mcon$insert(mtcars)
+#'
+#' # Create a lazy mongo object with this connection
+#' tbl <- tbl_mongo(mongo = mcon)
+#'
+#' # Create a mongodb query
 #' tbl2 <- tbl |>
 #'   filter(mpg < 20) |>
 #'   select(mpg, cyl, hp)
@@ -54,7 +67,7 @@
 #' # Use this JSON query directly in mongolite
 #' # Note, the connection is available as tbl2$mongo here but you do not
 #' # need {mongoplyr} any more and can use mongolite::mongo()$find() instead
-#' tbl2$mongo$aggregate(query)
+#' mcon$aggregate(query)  # or attr(tbl2, 'mongo')$aggregate(query)
 #'
 #' # A more complex exemple with summarise by group
 #' # Note: currently, names must be fun_var in summarise()
@@ -66,31 +79,42 @@
 #'     mean_hp  = mean(hp, na.rm = TRUE),  sd_hp  = sd(hp, na.rm = TRUE)) |>
 #'     collapse()
 #' query2
-#' tbl$mongo$aggregate(query2)
+#' mcon$aggregate(query2)
+#' mcon$disconnect()
 #' }
 tbl_mongo <- function(collection = "test", db = "test",
-url = "mongodb://localhost", max_scan = 1000L, ...,
-mongotranslate.path = getOption("mongotranslate.path")) {
+url = "mongodb://localhost", mongo = NULL, schema = attr(mongo, "schema"),
+max_scan = 100L, ..., path = getOption("mongotranslate.path")) {
 
-  mongo <- mongolite::mongo(collection, db = db, url = url, ...)
+  # Get or reuse the connection to a MongoDB collection
+  if (is.null(mongo)) {
+    mongo <- mongo(collection, db = db, url = url, ...)
 
-  tbl <- mongo$find('{}', limit = max_scan)[1L, ]
-  tbl <- tbl_lazy(tbl, con = simulate_odbc()) # Fake ODBC connection
-  tbl$mongo <- mongo
-  tbl$mongo.db <- db # TODO: deal with db in the URL too
-  tbl$mongo.collection <- collection
-  tbl$mongo.url <- url
-  tbl$max_scan <- max_scan
+    } else {# If a mongo is provided, collection, db and url are disregarded
+      if (!inherits(mongo, "mongo"))
+        stop("'mongo' must be a mongolite::mongo() object ", "
+          (connection to a MongoDB collection")
 
-  # Create a schema for this database using mongodrdl
-  cmd <- paste0('"', .mongodrdl(), '" --uri ',
-    paste(url, db, sep = "/"), ' -c "', collection, '" -s ', max_scan)
-  drdl <- system(cmd, intern = TRUE)
-  tbl$mongo.drdl <- drdl
-  tbl$mongo.translate <- .mongotranslate()
+      if (!missing(collection) || !missing(db) || !missing(url))
+        warning("When a mongo = connection is provided, collection =, db = and ",
+          "url = are not used")
+  }
 
-  class(tbl) <- unique(c("tbl_mongo", class(tbl)))
-  tbl
+  # Create or reuse a schema for that collection
+  if (is.null(schema)) {# Create a schema (note: it takes a little bit of time)
+    schema <- mongo_schema(mongo, max_scan = max_scan, path = path)
+    # Also attach the schema to mongo as an attribute (add or update it)
+    attr(mongo, "schema") <- schema
+  }
+  if (!inherits(schema, "mongo_schema"))
+    stop("'schema' must be a mongo_schema object")
+
+  # Create a tbl_lazy object faking an ODBC connection, attach mongo to it
+  # and subclass it into tbl_mongo
+  tbl <- attr(schema, "sample")
+  tbl <- tbl_lazy(tbl, con = simulate_odbc())
+  structure(tbl, mongo =  mongo, schema = schema, max_scan = max_scan,
+    path = path, class = unique(c("tbl_mongo", class(tbl))))
 }
 
 #' @export
@@ -98,9 +122,9 @@ mongotranslate.path = getOption("mongotranslate.path")) {
 #' @method print tbl_mongo
 print.tbl_mongo <- function(x, ...) {
   cat("<tbl_mongo> A lazy MongoDB table\n")
-  cat("- server URL:", x$mongo.url, "\n")
-  cat("- max scan. :", x$max_scan, "\n\n")
-  cat(x$mongo.drdl, sep = "\n")
+  cat("- server URL:", .mongo_orig(attr(x, 'mongo'))$url, "\n")
+  cat("- max scan. :", attr(x, 'max_scan'), "\n\n")
+  cat(as.character(attr(x, 'schema')), sep = "\n")
   invisible(x)
 }
 
@@ -116,7 +140,7 @@ collapse.tbl_mongo <- function(x, keep.names = FALSE, ...) {
 #' @method collect tbl_mongo
 collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
   query <- .tbl_mongo_query(x, keep.names = keep.names)
-  x$mongo$aggregate(query)
+  attr(x, 'mongo')$aggregate(query)
 }
 
 # Get the mongotranslate excutable (from Mongo BI Connector)
@@ -132,43 +156,40 @@ collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
   mongotranslate
 }
 
-# Get the mongodrdl excutable (from Mongo BI Connector)
-.mongodrdl <- function(path = getOption("mongotranslate.path")) {
-  if (is.null(path)) {
-    mongodrdl <- Sys.which("mongodrdl")
-  } else {
-    mongodrdl <- path.expand(file.path(path, "mongodrdl"))
-  }
-  if (mongodrdl == "" || !file.exists(mongodrdl))
-    stop("You must install MongoDB BI Connector and indicate the path ",
-      "in options(mongotranslate.path = ...) before use, see ?tbl_mongo.")
-  mongodrdl
-}
-
 # From here, one can use selected dplyr verbs on tbl and:
 # - get equivalent MongoDB query (json object) with collapse()
 # - perform the query on the MongoDB database with collect()
 .tbl_mongo_query <- function(x, keep.names = FALSE, ...) {
   sql <- as.character(remote_query(x))
-  # We got a SQL quesry that we have to rework to suit our particular context
+  # We got a SQL query that we have to rework to suit our particular context
   # of a MongoDB collection (we do so by using regular expressions, without
   # parsing the SQL statements)
 
   # The table here is always `df` => replace everywhere with the collection
-  sql <- gsub("`df`", paste0("`", x$mongo.collection, "`"), sql)
+  orig <- .mongo_orig(attr(x, 'mongo'))
+  collection <- orig$name
+  sql <- gsub("`df`", paste0("`", collection, "`"), sql)
 
   # Translate the sql query into MongoDB query (JSON) using mongotranslate
   sql_file <- tempfile(fileext = ".sql")   # The SQL query
-  drdl_file <- tempfile(fileext = ".drdl") # The schema
-  on.exit({ unlink(sql_file); unlink(drdl_file) })
+  schema_file <- tempfile(fileext = ".drdl") # The schema
+  on.exit({ unlink(sql_file); unlink(schema_file) })
   writeLines(sql, sql_file)
-  writeLines(x$mongo.drdl, drdl_file)
+  writeLines(as.character(attr(x, 'schema')), schema_file)
 
   # TODO: query MongoDB version and adjust accordingly
-  cmd <- paste0('"', x$mongo.translate,
-    '" -mongoVersion latest -dbName "', x$mongo.db, '" --queryFile "',
-    sql_file, '" --schema "', drdl_file, '"')
+  cmd <- paste0('"', .mongotranslate(attr(x, 'path')),
+    '" -mongoVersion latest -dbName "', orig$db, '" --queryFile "',
+    sql_file, '" --schema "', schema_file, '" --format multiline')
+  if (.Platform$OS.type == "windows")
+    cmd <- paste("wsl", cmd) # The program is run under Linux from within WSL
+  # TODO: better deal with errors here!
   mongo_query <- system(cmd, intern = TRUE)
+
+  # TODO: the JSON result should be parsed into list of lists and processed
+  # as such. For now, the prototyping is done by applying a series of regex
+  # transformations on the character string representation of the MongoDB JSON
+  # query
 
   # The forelast line renames the variables with strange names, like
   # app is renamed sdd_DOT_something_DOT_app... We don't want this...
@@ -179,16 +200,23 @@ collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
   # Get rid of the strange names for the forelast line
   if (!isTRUE(keep.names)) {
     # TODO: this does not work if the collection has an _ in its name!
-    name_prefix <- paste0('"', x$mongo.db, '_DOT_[^_]+_DOT_')
+    name_prefix <- paste0('"', orig$db, '_DOT_[^_]+_DOT_')
     forelast <- gsub(paste0(name_prefix, '([^"()]+)"'), '"\\1"',
       forelast)
-    # stddev_samp really should give a name sd
+    # avg -> mean
+    forelast <- gsub('_avg', '_mean', forelast)
+    # stddev_samp -> sd
     forelast <- gsub('_stddev_samp', '_sd', forelast)
     # Also rework sdd_DOT_qXX_DOT_fun(sdd_DOT_qXX_name) into fun_name
-    forelast <- gsub(paste0('"', x$mongo.db, '_DOT_([a-zA-Z]+)\\('), '"\\1_',
+    forelast <- gsub(paste0('"', orig$db, '_DOT_([a-zA-Z]+)\\('), '"\\1_',
       forelast)
-    forelast <- gsub(paste0('"([a-zA-Z]+)_', x$mongo.db,
-      '_DOT_q[0-9]+_DOT_([^)]+)\\)"'), '"\\1_\\2"', forelast)
+    forelast <- gsub(paste0('"([a-zA-Z]+)_', orig$db,
+      '_DOT_q[0-9]+_DOT_([^)]+)\\)"'), '"\\1_\\2"',
+      forelast)
+    # There is problem if the last projection creates and _id from $_id, so
+    # we eliminate it, if present.
+    forelast <- sub('("\\$project": *\\{ *)"_id": *"\\$_id",', '\\1',
+      forelast)
   }
 
   # The trailing comma at the forelast line makes problem in mongo$find()
@@ -226,4 +254,3 @@ print.mongo_query <- function(x, sql = FALSE, ...) {
   }
   invisible(x)
 }
-

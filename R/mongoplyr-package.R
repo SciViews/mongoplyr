@@ -21,15 +21,16 @@
 #'
 #' - [tbl_mongo()] creates an object that connects to your MongoDB database and
 #' use {dplyr} verbs in a lazy way.
-#' - [time_from_id()] get the creation date of a MongoDB document from its
-#' ObjectID.
+#' - [mongo_schema()] compute a schema to match a collection of MongoDB
+#' documents with a corresponding SQL table (required to translate SQL query
+#' into JSON MongoDB aggregation language).
 #'
 #' @keywords internal
 "_PACKAGE"
 
 #' @importFrom dplyr collect collapse
 #' @importFrom dbplyr remote_query simulate_odbc tbl_lazy
-#' @importFrom mongolite mongo
+#' @importFrom mongolite mongo ssl_options
 ## usethis namespace: start
 ## usethis namespace: end
 NULL

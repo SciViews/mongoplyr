@@ -34,8 +34,9 @@ Windows, or a Docker container or a virtual machine instead).
 \itemize{
 \item \code{\link[=tbl_mongo]{tbl_mongo()}} creates an object that connects to your MongoDB database and
 use {dplyr} verbs in a lazy way.
-\item \code{\link[=time_from_id]{time_from_id()}} get the creation date of a MongoDB document from its
-ObjectID.
+\item \code{\link[=mongo_schema]{mongo_schema()}} compute a schema to match a collection of MongoDB
+documents with a corresponding SQL table (required to translate SQL query
+into JSON MongoDB aggregation language).
 }
 }
 
