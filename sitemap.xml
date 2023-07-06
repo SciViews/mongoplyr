@@ -34,12 +34,12 @@
     <loc>https://www.sciviews.org/mongoplyr/reference/index.html</loc>
   </url>
   <url>
+    <loc>https://www.sciviews.org/mongoplyr/reference/mongo_schema.html</loc>
+  </url>
+  <url>
     <loc>https://www.sciviews.org/mongoplyr/reference/mongoplyr-package.html</loc>
   </url>
   <url>
     <loc>https://www.sciviews.org/mongoplyr/reference/tbl_mongo.html</loc>
-  </url>
-  <url>
-    <loc>https://www.sciviews.org/mongoplyr/reference/time_from_id.html</loc>
   </url>
 </urlset>

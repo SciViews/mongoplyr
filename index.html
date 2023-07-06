@@ -23,10 +23,11 @@
 <link href="style.css?nocache=123" rel="stylesheet">
 <!-- end of addition for svPkgdown --><meta property="og:title" content="Use {dplyr} and {dbplyr} with MongoDB">
 <meta property="og:description" content='Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr}
-  to create SQL queries, and then converts them into MongoDB JSON queries with
-  "mongotranslate" from the MongoDB BI connector (to be installed). One can also
-  recover the JSON query to use it directly into {mongolite}. This way,
-  {mongoplyr} serves as a translator from "dplyr" code to MongoDB JSON queries.'>
+    to create SQL queries, and then converts them into MongoDB JSON queries with
+    "mongotranslate" from the MongoDB BI connector (to be installed). One can
+    also recover the JSON query to use it directly into {mongolite}. This way,
+    {mongoplyr} serves as a translator from "dplyr" code to MongoDB JSON
+    queries.'>
 <meta property="og:image" content="https://www.sciviews.org/mongoplyr/logo.png">
 <meta name="twitter:card" content="summary">
 <!-- Mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js" async integrity="sha256-nlrDrBTHxJJlDDX22AS33xYI1OJHnGMDhiYMSe2U0e0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/config/TeX-AMS-MML_HTMLorMML.js" async integrity="sha256-4zys9A4hMQmtq2EUL+JRoXc0NZi8jVJMzb8onewOaSQ=" crossorigin="anonymous"></script><!-- Global site tag (gtag.js) - Google Analytics --><!--<script async src="https://www.googletagmanager.com/gtag/js?id=UA-462421-8"></script>
@@ -112,8 +113,12 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p>Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON queries with “mongotranslate” from the MongoDB BI Connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from {dplyr} code to MongoDB JSON queries.</p>
-<p><strong>Note: this is highly experimental. Do not expect to obtain running queries in MongoDB JSON for any {dplyr} pipeline!</strong> However, the code obtained could be a base to be edited later on.</p>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>Use {dplyr} verbs to query a MongoDB database. This uses {dbplyr} to create SQL queries, and then converts them into MongoDB JSON aggregating queries with “mongotranslate” from the MongoDB BI Connector (to be installed). One can also recover the JSON query to use it directly into {mongolite}. This way, {mongoplyr} serves as a translator from {dplyr} code to MongoDB JSON queries only during the prototyping phase.</p>
+<p><strong>Note: this is highly experimental. Do not expect to obtain running queries in MongoDB JSON for any and all {dplyr} pipelines!</strong> However, the code obtained could be a base to be edited later on. This is an additional argument to use {mongoplyr} only for prototyping your MongoDB JSON queries.</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -121,25 +126,136 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"SciViews/mongoplyr"</span><span class="op">)</span></span></code></pre></div>
+<p>You also need “mongotranslate” and “mongodrdl” external binaries that are provided by MongoDB BI Connector (note: “mongotranslate” is <strong>not</strong> provided under Windows, see here under).</p>
+<ul>
+<li><p>For Linux and MacOS, download the MongoDB BI Connector and follow instructions from here: <a href="https://www.mongodb.com/docs/bi-connector/current/installation/" class="external-link uri">https://www.mongodb.com/docs/bi-connector/current/installation/</a>. Also note that you must register and you need a premise MongoDB subscription to be allowed to use these binaries, … or you can use them for testing or prototyping purpose only (which is what we are going to do). In R, you can check accessibility to these programs by using <code>system("mongotranslate")</code>.</p></li>
+<li><p>For Windows, install WSL2 (see <a href="https://learn.microsoft.com/en-us/windows/wsl/install" class="external-link uri">https://learn.microsoft.com/en-us/windows/wsl/install</a>) and a Linux distribution for WSL (Ubuntu 22.04 for instance). Then, install MongoDB BI Connector in your WSL Linux as explained here above. Then, you should be able to access “mongotranslate”/“mongodrdl” through a command like <code>wsl mongotranslate</code>. Test it under R by issuing <code>system("wsl mongotranslate")</code>.</p></li>
+</ul>
+<p>If you made “mongotranslate” and “mongodrdl” accessible from the path (that is, these programs run in a terminal without specifying their complete path), you are done. If you prefer to isolate these programs in a directory, say in <code>/my/directory/to/mongodb_bi</code>, then {mongoplyr} will be able to access these programs if you indicate the path like this:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mongotranslate.path <span class="op">=</span> <span class="st">"/my/directory/to/mongodb_bi"</span><span class="op">)</span></span>
+<span><span class="co"># Test it with:</span></span>
+<span><span class="co">#system(file.path(getOption("mongotranslate.path"), "mongostranslate"))</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>TODO: a basic example…</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SciViews/mongoplyr" class="external-link">mongoplyr</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
-<p>Get help about this package:</p>
+<p>Here is a basic example using the five main {dplyr} verbs <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise()</a></code> (+ <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code>). We do not set up our own MongoDB server, but just reuse the example server provided by Jeroen Ooms, the author of the {mongolite} package that {mongoplyr} uses to connect to MongoDB.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SciViews/mongoplyr" class="external-link">mongoplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attachement du package : 'dplyr'</span></span>
+<span><span class="co">#&gt; Les objets suivants sont masqués depuis 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; Les objets suivants sont masqués depuis 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="va">database</span> <span class="op">&lt;-</span> <span class="st">"test"</span></span>
+<span><span class="va">collection</span> <span class="op">&lt;-</span> <span class="st">"mtcars"</span></span>
+<span><span class="va">mongodb_url</span> <span class="op">&lt;-</span> <span class="st">"mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"</span></span>
+<span></span>
+<span><span class="co"># Connect and make sure the collection contains the mtcars dataset</span></span>
+<span><span class="va">mcon</span> <span class="op">&lt;-</span> <span class="fu">mongolite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mongolite/man/mongo.html" class="external-link">mongo</a></span><span class="op">(</span><span class="va">collection</span>, <span class="va">database</span>, <span class="va">mongodb_url</span><span class="op">)</span></span>
+<span><span class="va">mcon</span><span class="op">$</span><span class="fu">drop</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mcon</span><span class="op">$</span><span class="fu">insert</span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ nInserted  : num 32</span></span>
+<span><span class="co">#&gt;  $ nMatched   : num 0</span></span>
+<span><span class="co">#&gt;  $ nRemoved   : num 0</span></span>
+<span><span class="co">#&gt;  $ nUpserted  : num 0</span></span>
+<span><span class="co">#&gt;  $ writeErrors: list()</span></span></code></pre></div>
+<p>Now, we create a <strong>tbl_mongo</strong> object that lazily matches a <strong>data.frame</strong> to this connection and allows to use {dplyr} verbs to query it.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tbl_mongo.html">tbl_mongo</a></span><span class="op">(</span>mongo <span class="op">=</span> <span class="va">mcon</span><span class="op">)</span></span>
+<span><span class="va">query</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">wt</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">cyl</span>, <span class="va">wt</span>, <span class="va">mpg</span>, <span class="va">hp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>log_hp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">hp</span><span class="op">)</span>, wt2 <span class="op">=</span> <span class="va">wt</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>    max_mpg     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">mpg</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    min_wt2     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">wt2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    mean_log_hp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">log_hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="co"># Here is the equivalent MongoDB JSON query</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;mongo_query&gt;</span></span>
+<span><span class="co">#&gt; [</span></span>
+<span><span class="co">#&gt;   {"$match": {"$and": [{"wt": {"$gte": {"$numberDecimal": "2"}}},{"mpg": {"$lt": {"$numberDecimal": "30"}}}]}},</span></span>
+<span><span class="co">#&gt;   {"$project": {"test__mtcars__cyl": "$cyl","test__mtcars__mpg": "$mpg","ln(test__mtcars__hp)": {"$cond": {"if": {"$gt": ["$hp",{"$literal": {"$numberInt": "0"}}]},"then": {"$ln": ["$hp"]},"else": {"$literal": null}}},"power(test__mtcars__wt,2)": {"$pow": ["$wt",{"$literal": {"$numberDecimal": "2"}}]}}},</span></span>
+<span><span class="co">#&gt;   {"$group": {"_id": "$test__mtcars__cyl","max(test__q01__mpg)": {"$max": "$test__mtcars__mpg"},"min(test__q01__wt2)": {"$min": "$power(test__mtcars__wt,2)"},"avg(test__q01__log_hp)": {"$avg": "$ln(test__mtcars__hp)"}}},</span></span>
+<span><span class="co">#&gt;   {"$addFields": {"_id": {"group_key_0": "$_id"}}},</span></span>
+<span><span class="co">#&gt;   {"$sort": {"_id.group_key_0": {"$numberInt": "1"}}},</span></span>
+<span><span class="co">#&gt;   {"$project": {"cyl": "$_id.group_key_0","max_mpg": "$max(test__q01__mpg)","min_wt2": "$min(test__q01__wt2)","mean_log_hp": "$avg(test__q01__log_hp)","_id": {"$numberInt": "0"}}}</span></span>
+<span><span class="co">#&gt; ]</span></span></code></pre></div>
+<p>Use <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code> to get the resulting <strong>data.frame</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   cyl max_mpg min_wt2 mean_log_hp</span></span>
+<span><span class="co">#&gt; 1   4    26.0  4.5796    4.498422</span></span>
+<span><span class="co">#&gt; 2   6    21.4  6.8644    4.792079</span></span>
+<span><span class="co">#&gt; 3   8    19.2 10.0489    5.318145</span></span></code></pre></div>
+<p>The query is just a character string (obtained with <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse()</a></code>) and it can be used as such directly in an <code>$aggregate()</code> method of a <strong>mongo</strong> object (the string is entered using the raw character syntax by embedding it in <code>r"{...}"</code>). Since it is pretty unreadable by anyone not used to the MongoDB aggregating language (and even by those who understand it, probably!) we copy and paste also the corresponding {dplyr} pipeline in comments above to better document it. In case you would need to refine this query later on, you know you can start from that {dplyr} pipeline in the comments. This way, you do not need {mongoplyr} any more, nor the external programs “mongotranslate” and “mongodrdl” to run that query on your database. So, you have just used {mongoplyr} for prototyping your query.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The next query is equivalent to (created with {mongoplyr}):</span></span>
+<span><span class="co">#tbl |&gt;</span></span>
+<span><span class="co">#  filter(mpg &lt; 30 &amp; wt &gt;= 2) |&gt;</span></span>
+<span><span class="co">#  select(cyl, wt, mpg, hp) |&gt;</span></span>
+<span><span class="co">#  mutate(log_hp = log(hp), wt2 = wt^2) |&gt;</span></span>
+<span><span class="co">#  group_by(cyl) |&gt;</span></span>
+<span><span class="co">#  summarise(</span></span>
+<span><span class="co">#    max_mpg     = max(mpg, na.rm = TRUE),</span></span>
+<span><span class="co">#    min_wt2     = min(wt2, na.rm = TRUE),</span></span>
+<span><span class="co">#    mean_log_hp = mean(log_hp, na.rm = TRUE)) |&gt;</span></span>
+<span><span class="co">#  arrange(cyl)</span></span>
+<span><span class="va">mcon</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="st">r"{[</span></span>
+<span><span class="st">  {"$match": {"$and": [{"wt": {"$gte": {"$numberDecimal": "2"}}},{"mpg": {"$lt": {"$numberDecimal": "30"}}}]}},</span></span>
+<span><span class="st">  {"$project": {"test__mtcars__cyl": "$cyl","test__mtcars__mpg": "$mpg","ln(test__mtcars__hp)": {"$cond": {"if": {"$gt": ["$hp",{"$literal": {"$numberInt": "0"}}]},"then": {"$ln": ["$hp"]},"else": {"$literal": null}}},"power(test__mtcars__wt,2)": {"$pow": ["$wt",{"$literal": {"$numberDecimal": "2"}}]}}},</span></span>
+<span><span class="st">  {"$group": {"_id": "$test__mtcars__cyl","max(test__q01__mpg)": {"$max": "$test__mtcars__mpg"},"min(test__q01__wt2)": {"$min": "$power(test__mtcars__wt,2)"},"avg(test__q01__log_hp)": {"$avg": "$ln(test__mtcars__hp)"}}},</span></span>
+<span><span class="st">  {"$addFields": {"_id": {"group_key_0": "$_id"}}},</span></span>
+<span><span class="st">  {"$sort": {"_id.group_key_0": {"$numberInt": "1"}}},</span></span>
+<span><span class="st">  {"$project": {"cyl": "$_id.group_key_0","max_mpg": "$max(test__q01__mpg)","min_wt2": "$min(test__q01__wt2)","mean_log_hp": "$avg(test__q01__log_hp)","_id": {"$numberInt": "0"}}}</span></span>
+<span><span class="st">]}"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   cyl max_mpg min_wt2 mean_log_hp</span></span>
+<span><span class="co">#&gt; 1   4    26.0  4.5796    4.498422</span></span>
+<span><span class="co">#&gt; 2   6    21.4  6.8644    4.792079</span></span>
+<span><span class="co">#&gt; 3   8    19.2 10.0489    5.318145</span></span></code></pre></div>
+<p>Compare this with a direct manipulation of <code>mtcars</code> as a <strong>data.frame</strong> using regular {dplyr} code:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">&lt;</span> <span class="fl">30</span> <span class="op">&amp;</span> <span class="va">wt</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">cyl</span>, <span class="va">wt</span>, <span class="va">mpg</span>, <span class="va">hp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>log_hp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">hp</span><span class="op">)</span>, wt2 <span class="op">=</span> <span class="va">wt</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
+<span>    max_mpg     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">mpg</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    min_wt2     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">wt2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    mean_log_hp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">log_hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 4</span></span>
+<span><span class="co">#&gt;     cyl max_mpg min_wt2 mean_log_hp</span></span>
+<span><span class="co">#&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     4    26      4.58        4.50</span></span>
+<span><span class="co">#&gt; 2     6    21.4    6.86        4.79</span></span>
+<span><span class="co">#&gt; 3     8    19.2   10.0         5.32</span></span></code></pre></div>
+<p>Do not forget to close the connection with the server.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">disconnect</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h2>
+<p>Help is accessible as usual by one of these instructions:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span>help <span class="op">=</span> <span class="st">"mongoplyr"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/help.html" class="external-link">help</a></span><span class="op">(</span><span class="st">"mongoplyr-package"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"mongoplyr"</span><span class="op">)</span> <span class="co"># Note: no vignette is installed with install_github()</span></span></code></pre></div>
-<p>For further instructions, please, refer to the help pages at <a href="https://www.sciviews.org/mongoplyr/" class="uri">https://www.sciviews.org/mongoplyr/</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
-</h2>
-<p>Please note that the mongoplyr project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>For further instructions, please, refer to the Web site at <a href="https://www.sciviews.org/mongoplyr/" class="uri">https://www.sciviews.org/mongoplyr/</a>.</p>
+<hr>
+<p>Please note that the {mongoplyr} package is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

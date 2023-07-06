@@ -80,8 +80,8 @@ by using collapse() to retrieve the JSON command in a character string."><meta p
     <div class="ref-description section level2">
     <p>The <strong>tbl_mongo</strong> object is a lazy connection to a MongoDB
 collection that you can use with dbplyr and dplyr verbs. The query
-in MongoDB JSON language is computed on <code>collect()</code>ing the results, or
-by using <code>collapse()</code> to retrieve the JSON command in a character string.</p>
+in MongoDB JSON language is computed on <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect()</a></code>ing the results, or
+by using <code><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse()</a></code> to retrieve the JSON command in a character string.</p>
     </div>
 
     <div class="section level2">
@@ -90,19 +90,21 @@ by using <code>collapse()</code> to retrieve the JSON command in a character str
 <span>  collection <span class="op">=</span> <span class="st">"test"</span>,</span>
 <span>  db <span class="op">=</span> <span class="st">"test"</span>,</span>
 <span>  url <span class="op">=</span> <span class="st">"mongodb://localhost"</span>,</span>
-<span>  max_scan <span class="op">=</span> <span class="fl">1000L</span>,</span>
+<span>  mongo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  schema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">mongo</span>, <span class="st">"schema"</span><span class="op">)</span>,</span>
+<span>  max_scan <span class="op">=</span> <span class="fl">100L</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  mongotranslate.path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mongotranslate.path"</span><span class="op">)</span></span>
+<span>  path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"mongotranslate.path"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for tbl_mongo</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for tbl_mongo</span></span>
-<span><span class="fu">collapse</span><span class="op">(</span><span class="va">x</span>, keep.names <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse</a></span><span class="op">(</span><span class="va">x</span>, keep.names <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for tbl_mongo</span></span>
-<span><span class="fu">collect</span><span class="op">(</span><span class="va">x</span>, keep.names <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="va">x</span>, keep.names <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for mongo_query</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, sql <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -124,16 +126,27 @@ mongolite internally, see the documentation at
 https://jeroen.github.io/mongolite/connecting-to-mongodb.html.</p></dd>
 
 
+<dt>mongo</dt>
+<dd><p>A <strong>mongo</strong> connection to a MongoDB collection. If provided, it
+supersedes collection=, db= and url= that may not be provided (or a warning
+is issued).</p></dd>
+
+
+<dt>schema</dt>
+<dd><p>A schema for this collection as calculated by the MongoDB BI app
+"mongodrdl", in a <strong>mongo_schema</strong> object from <code><a href="mongo_schema.html">mongo_schema()</a></code>.</p></dd>
+
+
 <dt>max_scan</dt>
 <dd><p>The maximum number of documents to scan in the collection in
-order to infer the corresponding schema with mongodrdl (1000 by default).</p></dd>
+order to infer the corresponding schema with mongodrdl (100 by default).</p></dd>
 
 
 <dt>...</dt>
 <dd><p>More parameters to <code>mongo()</code> to connect to the MongoDB server.</p></dd>
 
 
-<dt>mongotranslate.path</dt>
+<dt>path</dt>
 <dd><p>The path to the mongotranslate and mongodrdl
 software. Can be set via <code>options(mongotranslate.path = ....)</code>, or left empty
 if these executables are on the search path.</p></dd>
@@ -177,9 +190,16 @@ the MongoDB JSON query corresponding to the process in a <strong>mongo_query</st
 <span class="r-in"><span><span class="va">database</span> <span class="op">&lt;-</span> <span class="st">"test"</span></span></span>
 <span class="r-in"><span><span class="va">collection</span> <span class="op">&lt;-</span> <span class="st">"mtcars"</span></span></span>
 <span class="r-in"><span><span class="va">mongodb_url</span> <span class="op">&lt;-</span> <span class="st">"mongodb+srv://readwrite:test@cluster0-84vdt.mongodb.net"</span></span></span>
-<span class="r-in"><span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu">tbl_mongo</span><span class="op">(</span><span class="va">collection</span>, <span class="va">database</span>, url <span class="op">=</span> <span class="va">mongodb_url</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create a simple mongodb query</span></span></span>
+<span class="r-in"><span><span class="co"># Connect and make sure the collection contains the mtcars dataset</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span> <span class="op">&lt;-</span> <span class="fu">mongolite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mongolite/man/mongo.html" class="external-link">mongo</a></span><span class="op">(</span><span class="va">collection</span>, <span class="va">database</span>, <span class="va">mongodb_url</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">drop</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">insert</span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create a lazy mongo object with this connection</span></span></span>
+<span class="r-in"><span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu">tbl_mongo</span><span class="op">(</span>mongo <span class="op">=</span> <span class="va">mcon</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create a mongodb query</span></span></span>
 <span class="r-in"><span><span class="va">tbl2</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">&lt;</span> <span class="fl">20</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="va">cyl</span>, <span class="va">hp</span><span class="op">)</span></span></span>
@@ -191,7 +211,7 @@ the MongoDB JSON query corresponding to the process in a <strong>mongo_query</st
 <span class="r-in"><span><span class="co"># Use this JSON query directly in mongolite</span></span></span>
 <span class="r-in"><span><span class="co"># Note, the connection is available as tbl2$mongo here but you do not</span></span></span>
 <span class="r-in"><span><span class="co"># need {mongoplyr} any more and can use mongolite::mongo()$find() instead</span></span></span>
-<span class="r-in"><span><span class="va">tbl2</span><span class="op">$</span><span class="va">mongo</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query</span><span class="op">)</span>  <span class="co"># or attr(tbl2, 'mongo')$aggregate(query)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A more complex exemple with summarise by group</span></span></span>
 <span class="r-in"><span><span class="co"># Note: currently, names must be fun_var in summarise()</span></span></span>
@@ -203,7 +223,8 @@ the MongoDB JSON query corresponding to the process in a <strong>mongo_query</st
 <span class="r-in"><span>    mean_hp  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,  sd_hp  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">hp</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collapse</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">query2</span></span></span>
-<span class="r-in"><span><span class="va">tbl</span><span class="op">$</span><span class="va">mongo</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">aggregate</span><span class="op">(</span><span class="va">query2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mcon</span><span class="op">$</span><span class="fu">disconnect</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
