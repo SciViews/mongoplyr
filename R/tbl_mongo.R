@@ -145,15 +145,23 @@ collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
 
 # Get the mongotranslate excutable (from Mongo BI Connector)
 .mongotranslate <- function(path = getOption("mongotranslate.path")) {
-  if (is.null(path)) {
-    mongotranslate <- Sys.which("mongotranslate")
-  } else {
-    mongotranslate <- path.expand(file.path(path, "mongotranslate"))
+  if (.Platform$OS.type == "windows") {# Do not test (probably run from WSL)
+    if (is.null(path)) {
+      mongotranslate <- "mongotranslate"
+    } else {
+      mongotranslate <- file.path(path, "mongotranslate")
+    }
+  } else {# Linux or MacOS: full test
+    if (is.null(path)) {
+      mongotranslate <- Sys.which("mongotranslate")
+    } else {
+      mongotranslate <- path.expand(file.path(path, "mongotranslate"))
+    }
+    if (mongotranslate == "" || !file.exists(mongotranslate))
+      stop("You must install MongoDB BI Connector and indicate the path ",
+        "in options(mongotranslate.path = ...) before use, see ?tbl_mongo.")
+    mongotranslate
   }
-  if (mongotranslate == "" || !file.exists(mongotranslate))
-    stop("You must install MongoDB BI Connector and indicate the path ",
-      "in options(mongotranslate.path = ...) before use, see ?tbl_mongo.")
-  mongotranslate
 }
 
 # From here, one can use selected dplyr verbs on tbl and:

@@ -171,13 +171,21 @@ mtcars_schema <- function(db = "test", collection = "mtcars") {
 
 # Get the mongodrdl excutable (from Mongo BI Connector)
 .mongodrdl <- function(path = getOption("mongotranslate.path")) {
-  if (is.null(path)) {
-    mongodrdl <- Sys.which("mongodrdl")
-  } else {
-    mongodrdl <- path.expand(file.path(path, "mongodrdl"))
+  if (.Platform$OS.type == "windows") {# Do not test (probably run from WSL)
+    if (is.null(path)) {
+      mongodrdl <- "mongodrdl"
+    } else {
+      mongodrdl <- file.path(path, "mongodrdl")
+    }
+  } else {# Linux or MacOS: full test
+    if (is.null(path)) {
+      mongodrdl <- Sys.which("mongodrdl")
+    } else {
+      mongodrdl <- path.expand(file.path(path, "mongodrdl"))
+    }
+    if (mongodrdl == "" || !file.exists(mongodrdl))
+      stop("You must install MongoDB BI Connector and indicate the path ",
+        "in options(mongotranslate.path = ...) before use, see ?tbl_mongo.")
   }
-  if (mongodrdl == "" || !file.exists(mongodrdl))
-    stop("You must install MongoDB BI Connector and indicate the path ",
-      "in options(mongotranslate.path = ...) before use, see ?tbl_mongo.")
   mongodrdl
 }
