@@ -209,6 +209,12 @@ mtcars |>
 #> 3     8    19.2   10.0         5.32
 ```
 
+Do not forget to close the connection with the server.
+
+``` r
+mcon$disconnect()
+```
+
 ## Getting help
 
 Help is accessible as usual by one of these instructions:

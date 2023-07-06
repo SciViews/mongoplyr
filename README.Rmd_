@@ -132,6 +132,12 @@ mtcars |>
   arrange(cyl)
 ```
 
+Do not forget to close the connection with the server.
+
+```{r}
+mcon$disconnect()
+```
+
 ## Getting help
 
 Help is accessible as usual by one of these instructions:
