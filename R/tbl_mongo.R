@@ -185,10 +185,26 @@ collect.tbl_mongo <- function(x, keep.names = FALSE, ...) {
   writeLines(sql, sql_file)
   writeLines(as.character(attr(x, 'schema')), schema_file)
 
+  # Under Windows, the files are accessed trough WSL -> need to rework the path
+  if (.Platform$OS.type == "windows") {
+    wsl_path <- function(path) {
+      drive <- tolower(substring(path, 1L, 1L)) # This has to be in lowercase!
+      # Replace drive
+      path <- sub("^[c-zC-Z]:", paste0("/mnt/", drive), path)
+      gsub("\\\\", "/", path)
+    }
+    sql_path <- wsl_path(sql_file)
+    schema_path <- wsl_path(schema_file)
+
+  } else {# No change to file paths
+    sql_path <- sql_file
+    schema_path <- schema_file
+  }
+
   # TODO: query MongoDB version and adjust accordingly
   cmd <- paste0('"', .mongotranslate(attr(x, 'path')),
     '" -mongoVersion latest -dbName "', orig$db, '" --queryFile "',
-    sql_file, '" --schema "', schema_file, '" --format multiline')
+    sql_path, '" --schema "', schema_path, '" --format multiline')
   if (.Platform$OS.type == "windows")
     cmd <- paste("wsl", cmd) # The program is run under Linux from within WSL
   # TODO: better deal with errors here!
